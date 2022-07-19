@@ -1,7 +1,12 @@
 package block
 
-func main(){
-    Reverse := Block {
+import (
+    "encoding/hex"
+    "bytes"
+)
+
+var(
+    Reverse Block = Block {
         Name: "Reverse",
         Description: "Reverses String",
         Out: 
@@ -14,6 +19,22 @@ func main(){
         },
     }
 
-    _ = Reverse
+    ToHex Block = Block {
+        Name: "To Hex",
+        Description: "Converts String to Hex",
+        Out:
+        func(i string) string {
+            var hx = hex.EncodeToString([]byte(i))
+            var buffer bytes.Buffer
+            var l_1 = len(hx) - 1
+            for i,rune := range hx {
+               buffer.WriteRune(rune)
+               if i % 2 == 1 && i != l_1  {
+                  buffer.WriteRune(' ')
+               }
+            }
+            return buffer.String()
+        },
+    }
 
-}
+)
