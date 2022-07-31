@@ -5,7 +5,10 @@ import (
 	"fmt"
 	"os"
 	"strings"
+
 	"swx/block"
+	"swx/stack"
+	"swx/utils"
 )
 
 const stack_keyword = "<!>"
@@ -14,7 +17,7 @@ func main() {
 	reader := bufio.NewReader(os.Stdin)
 
 	fmt.Println(`
-    (v03)────✦─────────✦┬─►
+(v03)────✦─────────✦┬─►
   ✦│ Welcome✦to SWX │ ✦
  ◄─┴──✦──────────✦──(golang)
  `)
@@ -23,7 +26,10 @@ func main() {
 	// [-1]  stack
 	var state int = 1
 
-	var stack = []block.Block{}
+	// Init empty stack
+	var prog_stack = stack.Stack{
+		Blocks: []block.Block{},
+	}
 
 	for {
 		if state == -1 {
@@ -31,6 +37,7 @@ func main() {
 		} else {
 			fmt.Print("swx✦> ")
 		}
+		// Get input
 		inp, _ := reader.ReadString('\n')
 		inp = strings.Replace(inp, "\n", "", -1)
 
@@ -41,32 +48,22 @@ func main() {
 		} else if inp == "quit" || inp == "exit" {
 			os.Exit(0)
 		}
-
+		
+		// Stack Editor mode
 		if state == -1 {
 			switch inp {
 
-			case "list":
-				for i, b := range stack {
+			case "list", "ls":
+				for i, b := range prog_stack.Blocks {
 					fmt.Printf("[%d]✦ %s\n", i+1, b.Name)
 				}
 
 			// If command is not one word, parse below
 			default:
-				if strings.HasPrefix(inp, "add ") {
 
-					id := block.Get_id(inp)
-
-					// doesent exist
-					if id == "##nf" {
-						fmt.Printf("Block -> %s <- not found\n", inp)
-					// invalid syntax
-					} else if id == "###ivnsyn" {
-						fmt.Println("Invalid syntax. EG: > add 'reverse'")
-					// add to stack
-					} else {
-						stack = append(stack, block.Blocks[id])
-					}
-
+				// console
+				if utils.Parse(inp, []string{"add", "a", "+"}) {
+					prog_stack = stack.ModStack(prog_stack, "add", inp)
 				}
 
 			} // end switch
@@ -80,7 +77,7 @@ func main() {
 
 			// i = index
 			// b = block
-			for _, b := range stack {
+			for _, b := range prog_stack.Blocks {
 				out = b.Out(out)
 			}
 
